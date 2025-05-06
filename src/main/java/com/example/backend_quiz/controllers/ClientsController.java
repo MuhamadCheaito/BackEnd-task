@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/clients")
+@RequestMapping("api/clients")
 public class ClientsController {
 
     @Autowired
@@ -36,7 +36,7 @@ public class ClientsController {
         return ResponseEntity.status(201).body(createdClient);
     }
 
-    @PutMapping("update/{id}")
+    @PutMapping("edit/{id}")
     public ResponseEntity<Client> updateClient(@PathVariable int id, @RequestBody Client updatedClient) {
         Client client = clientService.updateClient(id, updatedClient);
         if (client != null) {
