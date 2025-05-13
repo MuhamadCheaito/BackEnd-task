@@ -21,14 +21,14 @@ public class ProductsController {
     }
     
     @PostMapping("new")
-    public ResponseEntity<String> createProduct(@RequestBody Product product) {
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         try {
             productService.createProduct(product);
             return ResponseEntity.ok(product);
         }
         catch(Exception ex) {
              ex.printStackTrace();
-             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
