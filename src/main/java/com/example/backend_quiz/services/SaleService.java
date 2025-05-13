@@ -29,48 +29,74 @@ public class SaleService {
     }
 
     public Sale createSale(Sale sale) {
-        sale.setId(sales.size() + 1);
-        sales.add(sale);
-        logger.info("Created new sale with ID: {}", sale.getId());
-        return sale;
+    if (sale.getClient() == null || sale.getClient().getId() <= 0) {
+        throw new IllegalArgumentException("Invalid client ID.");
     }
+
+    for (Transaction t : sale.getTransactions()) {
+        if (t.getProductId() <= 0 || t.getQuantity() <= 0 || t.getUnitPrice() < 0) {
+            throw new IllegalArgumentException("Invalid transaction data.");
+        }
+    }
+
+    sale.setId(sales.size() + 1);
+    sales.add(sale);
+    logger.info("Created new sale with ID: {}", sale.getId());
+    return sale;
+}
+
 
     public Sale updateSale(int id, Sale updatedSale) {
-        Sale sale = getSaleById(id);
-        if (sale != null) {
-            for (int i = 0; i < updatedSale.getTransactions().size(); i++) {
-                Transaction originalTransaction = sale.getTransactions().get(i);
-                Transaction updatedTransaction = updatedSale.getTransactions().get(i);
+    if (id <= 0) {
+        throw new IllegalArgumentException("Invalid sale ID.");
+    }
 
-                if (originalTransaction.getQuantity() != updatedTransaction.getQuantity()) {
-                    logger.info("Updated quantity for product {} in sale {}: {} → {}",
-                            updatedTransaction.getProductId(),
-                            id,
-                            originalTransaction.getQuantity(),
-                            updatedTransaction.getQuantity());
-                }
+    Sale sale = getSaleById(id);
+    if (sale == null) {
+        throw new IllegalArgumentException("Sale with ID " + id + " does not exist.");
+    }
 
-                if (originalTransaction.getUnitPrice() != updatedTransaction.getUnitPrice()) {
-                    logger.info("Updated unit price for product {} in sale {}: ${} → ${}",
-                            updatedTransaction.getProductId(),
-                            id,
-                            originalTransaction.getUnitPrice(),
-                            updatedTransaction.getUnitPrice());
-                }
+    List<Transaction> originalTransactions = sale.getTransactions();
+    List<Transaction> updatedTransactions = updatedSale.getTransactions();
+
+    for (int i = 0; i < updatedTransactions.size(); i++) {
+        Transaction updatedTransaction = updatedTransactions.get(i);
+        if (updatedTransaction.getProductId() <= 0 || updatedTransaction.getQuantity() <= 0 || updatedTransaction.getUnitPrice() < 0) {
+            throw new IllegalArgumentException("Invalid transaction data.");
+        }
+
+        if (i < originalTransactions.size()) {
+            Transaction originalTransaction = originalTransactions.get(i);
+
+            if (originalTransaction.getQuantity() != updatedTransaction.getQuantity()) {
+                logger.info("Updated quantity for product {} in sale {}: {} → {}",
+                        updatedTransaction.getProductId(), id,
+                        originalTransaction.getQuantity(), updatedTransaction.getQuantity());
             }
 
-            sale.setTransactions(updatedSale.getTransactions());
-            sale.setTotal(updatedSale.getTotal());
-            logger.info("Updated sale with ID: {}", id);
-            return sale;
+            if (originalTransaction.getUnitPrice() != updatedTransaction.getUnitPrice()) {
+                logger.info("Updated unit price for product {} in sale {}: ${} → ${}",
+                        updatedTransaction.getProductId(), id,
+                        originalTransaction.getUnitPrice(), updatedTransaction.getUnitPrice());
+            }
         }
-        return null;
     }
 
+    sale.setTransactions(updatedTransactions);
+    sale.setTotal(updatedSale.getTotal());
+    logger.info("Updated sale with ID: {}", id);
+    return sale;
+}
+
+
     public Sale getSaleById(int id) {
-        return sales.stream()
-                .filter(sale -> sale.getId() == id)
-                .findFirst()
-                .orElse(null);
+    if (id <= 0) {
+        throw new IllegalArgumentException("Invalid sale ID.");
     }
+
+    return sales.stream()
+            .filter(sale -> sale.getId() == id)
+            .findFirst()
+            .orElse(null);
+}
 }

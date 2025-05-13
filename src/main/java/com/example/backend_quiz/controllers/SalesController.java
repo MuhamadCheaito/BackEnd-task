@@ -3,7 +3,7 @@ package com.example.backend_quiz.controllers;
 import com.example.backend_quiz.models.Sale;
 import com.example.backend_quiz.services.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,33 +16,41 @@ public class SalesController {
     private SaleService saleService;
 
     @GetMapping
-    public List<Sale> getAllSales() {
-        return saleService.getAllSales();
+    public ResponseEntity<List<Sale>> getAllSales() {
+        return ResponseEntity.ok(saleService.getAllSales());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Sale> getSaleById(@PathVariable int id) {
-        Sale sale = saleService.getSaleById(id);
-        if (sale != null) {
-            return ResponseEntity.ok(sale);
-        } else {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> getSaleById(@PathVariable int id) {
+        try {
+            Sale sale = saleService.getSaleById(id);
+            if (sale != null) {
+                return ResponseEntity.ok(sale);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sale not found.");
+            }
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
     @PostMapping("new")
-    public ResponseEntity<Sale> createSale(@RequestBody Sale sale) {
-        Sale createdSale = saleService.createSale(sale);
-        return ResponseEntity.status(201).body(createdSale);
+    public ResponseEntity<?> createSale(@RequestBody Sale sale) {
+        try {
+            Sale createdSale = saleService.createSale(sale);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdSale);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + ex.getMessage());
+        }
     }
 
     @PutMapping("edit/{id}")
-    public ResponseEntity<Sale> updateSale(@PathVariable int id, @RequestBody Sale updatedSale) {
-        Sale sale = saleService.updateSale(id, updatedSale);
-        if (sale != null) {
+    public ResponseEntity<?> updateSale(@PathVariable int id, @RequestBody Sale updatedSale) {
+        try {
+            Sale sale = saleService.updateSale(id, updatedSale);
             return ResponseEntity.ok(sale);
-        } else {
-            return ResponseEntity.notFound().build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + ex.getMessage());
         }
     }
 }

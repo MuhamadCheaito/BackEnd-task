@@ -24,7 +24,17 @@ public class ProductService {
     }
 
     public void createProduct(Product product) {
-        products.add(product);
+        if(product.getId() <= 0) {
+            throw new IllegalArgumentException("Product ID cannot be negative or zero.");
+        }
+        
+        boolean productIdExists = products.stream().anyMatch(p -> p.getId() == product.getId());
+        
+        if(productIdExists) {
+            throw new IllegalArgumentException("Product with ID " + product.getId() + " already exists!");
+        }
+        
+        products.add(product); 
     }
 
     public boolean updateProduct(int id, Product updatedProduct) {
