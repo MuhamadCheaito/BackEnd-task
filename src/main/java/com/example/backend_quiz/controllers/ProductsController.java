@@ -22,17 +22,14 @@ public class ProductsController {
     }
     
     @PostMapping("new")
-    public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody Product product) {
-        ApiResponse<Product> res = new ApiResponse<>();
+    public ResponseEntity<?> createProduct(@RequestBody Product product) {
         try {
-            res.setData(product);
-            productService.createProduct(res.getData());
-            return ResponseEntity.ok(res);
+            productService.createProduct(product);
+            return ResponseEntity.ok(product);
         }
         catch(Exception ex) {
-             res.setError(ex.getMessage());
              ex.printStackTrace();
-             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
     }
 
