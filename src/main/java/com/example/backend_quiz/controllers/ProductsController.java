@@ -2,6 +2,7 @@ package com.example.backend_quiz.controllers;
 
 import com.example.backend_quiz.services.ProductService;
 import com.example.backend_quiz.models.Product;
+import com.example.backend_quiz.models.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -21,14 +22,17 @@ public class ProductsController {
     }
     
     @PostMapping("new")
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+    public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody Product product) {
+        ApiResponse<Product> res = new ApiResponse<>();
         try {
-            productService.createProduct(product);
-            return ResponseEntity.ok(product);
+            res.setData(product);
+            productService.createProduct(res.getData());
+            return ResponseEntity.ok(res);
         }
         catch(Exception ex) {
+             res.setError(ex.getMessage());
              ex.printStackTrace();
-             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
         }
     }
 
