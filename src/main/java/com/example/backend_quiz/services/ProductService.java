@@ -48,4 +48,7 @@ public class ProductService {
         }
         return false;
     }
+    public Product getProductById(int id) {
+        return products.stream().filter(p -> p.getId() == id).findFirst().get();
+    }
 }

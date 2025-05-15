@@ -2,7 +2,6 @@ package com.example.backend_quiz.controllers;
 
 import com.example.backend_quiz.services.ProductService;
 import com.example.backend_quiz.models.Product;
-import com.example.backend_quiz.models.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -34,13 +33,18 @@ public class ProductsController {
     }
 
     @PutMapping("edit/{id}") 
-    public ResponseEntity<String> updatedProduct(@PathVariable int id, @RequestBody Product product) {
-        boolean updated = productService.updateProduct(id, product);
-        if(updated) {
-            return ResponseEntity.ok("Product updated successfully.");
-        }
-        else {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> updateProduct(@PathVariable int id, @RequestBody Product product) {
+        try {
+            boolean updated = productService.updateProduct(id, product);
+            if (updated) {
+                Product updatedProduct = productService.getProductById(id);
+                return ResponseEntity.ok(updatedProduct); // Return only the updated product
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + ex.getMessage());
         }
     }
 }
